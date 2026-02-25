@@ -1,0 +1,8 @@
+[Session]
+# Disable xfdesktop to save RAM
+Client0_Command=xfwm4
+Client0_PerScreen=False
+Client1_Command=xfce4-panel
+Client1_PerScreen=False
+Client2_Command=xfce4-terminal
+Client2_PerScreen=False
