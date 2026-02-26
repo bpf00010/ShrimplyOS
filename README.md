@@ -30,16 +30,6 @@ directory_structure:
       - compile_kernel.sh
 ```
 
-## Architectural Critique and Vulnerability Analysis
-
-As a Level 9 systems architecture review, the proposed hybrid LFS/Debian model and the LightDM/TUI fallback mechanism present severe structural and operational inefficiencies that must be addressed before compilation.
-
-1. **The LFS/Debian Hybrid Fallacy**: Mixing Linux From Scratch (LFS) compilation principles for the "core" with a Debian userland is highly volatile. Debian's `apt` and `dpkg` rely on strict Application Binary Interface (ABI) tracking and specific versions of `glibc`, `systemd`, and `coreutils`. If you compile `glibc` from scratch, `apt` will fail to resolve dependencies, leading to a shattered package tree. 
-   * **Resolution**: The "LFS principle" must be strictly confined to the Linux Kernel and specific isolated binaries. The GNU toolchain and core userland must be bootstrapped via `debootstrap` to maintain package manager integrity and receive upstream CVE patches.
-2. **The LightDM to TUI Fallback Inefficiency**: The requirement states: *"If XFCE is bypassed, the system must fall back to LightDM and a Terminal User Interface (TUI)."* This is an architectural anti-pattern. LightDM is an X11 display manager. Forcing the system to initialize an X server, load video drivers, and allocate framebuffer memory merely to render a TUI wastes critical system resources.
-   * **Resolution**: The system must default to `multi-user.target` (runlevel 3), launching the TUI directly on the TTY. If the user selects the XFCE environment, the TUI should invoke `systemctl isolate graphical.target` to spawn LightDM and XFCE.
-3. **NVIDIA DKMS Vulnerability**: Installing proprietary NVIDIA drivers during the bootstrap phase on a custom-compiled kernel will fail if the custom kernel headers are not properly packaged as `.deb` files and injected into the chroot. DKMS requires exact header matching.
-
 ## System Dependencies and Repository Sources
 
 **Table 1: Barebones Package Dependencies**
