@@ -80,3 +80,22 @@ To further refine Shrimply OS, the following advanced documentation should be ap
     *   *Reference*: [Debian Wiki - Multistrap](https://wiki.debian.org/Multistrap)
 4.  **Linux From Scratch (LFS) Kernel Configuration**: For stripping the kernel of all unnecessary modules to achieve sub-second boot times.
     *   *Reference*: [LFS Chapter 10 - Making the LFS System Bootable](https://www.linuxfromscratch.org/lfs/view/stable/chapter10/kernel.html)
+
+## UEFI-First ISO Build Workflow
+
+Shrimply OS now uses a **UEFI-first ISO workflow** and treats BIOS hybrid post-processing as optional. In this environment, `live-build` may still call `isohybrid` during finalization even when UEFI is the target. The build script handles this by recovering the generated ISO artifact if `lb build` exits late in the pipeline.
+
+### Expected build command
+
+```bash
+bash scripts/05-build-boot-image.sh
+```
+
+### Expected output artifacts
+
+- `build/artifacts/shrimplyos-bookworm-amd64.iso`
+- `build/artifacts/shrimplyos-bookworm-amd64.iso.sha256`
+
+### Recovery behavior (by design)
+
+If `lb build` returns non-zero near the end of binary image generation, the script will automatically salvage the ISO from known live-build output locations (for example `chroot/binary.hybrid.iso`) and still emit the final artifact and checksum. This is the supported workflow for this project on the current host toolchain.

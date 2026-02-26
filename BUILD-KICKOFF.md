@@ -44,6 +44,15 @@ Inside Ubuntu:
 sudo bash scripts/00-bootstrap.sh
 ```
 
+## 4.1) Monitor ISO build progress (no repeated rebuild commands)
+After starting the ISO build once, use the progress watcher:
+
+```bash
+bash scripts/06-watch-iso-build.sh build/logs/iso-build.log
+```
+
+This renders a live progress bar and phase label from `live-build` logs, so you can monitor a single running build instead of restarting it.
+
 ## 5) LFS discipline constraints used in this project
 - LFS-style source compilation is limited to kernel and isolated tooling.
 - Debian userland ABI-managed packages remain under apt/dpkg control.
