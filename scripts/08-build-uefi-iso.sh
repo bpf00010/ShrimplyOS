@@ -16,7 +16,13 @@ for required_cmd in xorriso grub-mkstandalone mkfs.vfat mmd mcopy dd cp unsquash
   fi
 done
 
-BINARY_ROOT="$RUN_ROOT/binary"
+if [[ -d "$RUN_ROOT/binary" ]]; then
+  BINARY_ROOT="$RUN_ROOT/binary"
+elif [[ -d "$RUN_ROOT/../binary" ]]; then
+  BINARY_ROOT="$RUN_ROOT/../binary"
+else
+  BINARY_ROOT="$RUN_ROOT/binary"
+fi
 SQUASHFS="$BINARY_ROOT/live/filesystem.squashfs"
 
 if [[ ! -f "$SQUASHFS" ]]; then
@@ -28,7 +34,11 @@ KERNEL_SRC=""
 INITRD_SRC=""
 for candidate in \
   "$RUN_ROOT/boot/vmlinuz-"* \
-  "$RUN_ROOT/vmlinuz"; do
+  "$RUN_ROOT/vmlinuz" \
+  "$RUN_ROOT/../boot/vmlinuz-"* \
+  "$RUN_ROOT/../vmlinuz" \
+  "$BINARY_ROOT/live/vmlinuz" \
+  "$BINARY_ROOT/live/vmlinux"; do
   if [[ -f "$candidate" ]]; then
     KERNEL_SRC="$candidate"
     break
@@ -37,7 +47,10 @@ done
 
 for candidate in \
   "$RUN_ROOT/boot/initrd.img-"* \
-  "$RUN_ROOT/initrd.img"; do
+  "$RUN_ROOT/initrd.img" \
+  "$RUN_ROOT/../boot/initrd.img-"* \
+  "$RUN_ROOT/../initrd.img" \
+  "$BINARY_ROOT/live/initrd.img"; do
   if [[ -f "$candidate" ]]; then
     INITRD_SRC="$candidate"
     break

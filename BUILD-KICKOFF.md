@@ -44,6 +44,15 @@ Inside Ubuntu:
 sudo bash scripts/00-bootstrap.sh
 ```
 
+## 4.2) Default ISO build command (automatic first try)
+From Windows PowerShell (recommended):
+
+```powershell
+wsl.exe -u root bash -lc "set -e; rm -rf /root/ShrimplyOS-build; mkdir -p /root/ShrimplyOS-build; cp -a /mnt/c/Users/igdes/ShrimplyOS/. /root/ShrimplyOS-build/; cd /root/ShrimplyOS-build; sed -i 's/\r$//' scripts/*.sh; ./scripts/05-build-boot-image.sh; ./scripts/08-build-uefi-iso.sh /root/ShrimplyOS-build/build/live-build/chroot /root/ShrimplyOS-build/build/artifacts shrimplyos-bookworm-amd64-uefi-x64.iso; cp -f build/artifacts/shrimplyos-bookworm-amd64-uefi-x64.iso /mnt/c/Users/igdes/ShrimplyOS/build/artifacts/; cp -f build/artifacts/shrimplyos-bookworm-amd64-uefi-x64.iso.sha256 /mnt/c/Users/igdes/ShrimplyOS/build/artifacts/"
+```
+
+This avoids `/mnt/c` chroot edge cases and root-permission failures by building in native WSL filesystem, then copying artifacts back to the workspace.
+
 ## 4.1) Monitor ISO build progress (no repeated rebuild commands)
 After starting the ISO build once, use the progress watcher:
 
@@ -65,8 +74,9 @@ This renders a live progress bar and phase label from `live-build` logs, so you 
 
 ## 7) Minimal LightDM/XFCE handoff policy
 - Default target is `multi-user.target`.
-- TUI runs first and asks whether to isolate into `graphical.target`.
-- XFCE package set intentionally excludes bulky components.
+- TUI runs first and asks whether to ascend into XFCE.
+- On first-boot ascend, the script auto-installs the full XFCE desktop package (`xfce4`) plus runtime launch dependencies (`xinit`, `dbus-x11`, `lightdm`, `lightdm-gtk-greeter`).
+- If systemd is unavailable, the handoff falls back to `dbus-run-session startxfce4`.
 
 ## 8) Build validation checkpoints
 1. `debootstrap` completes without keyring or repository errors.

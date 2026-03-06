@@ -87,14 +87,53 @@ Shrimply OS now uses a **UEFI-first ISO workflow** and treats BIOS hybrid post-p
 
 ### Expected build command
 
+From Windows PowerShell (recommended first try; automatic WSL root build):
+
+```powershell
+wsl.exe -u root bash -lc "set -e; rm -rf /root/ShrimplyOS-build; mkdir -p /root/ShrimplyOS-build; cp -a /mnt/c/Users/igdes/ShrimplyOS/. /root/ShrimplyOS-build/; cd /root/ShrimplyOS-build; sed -i 's/\r$//' scripts/*.sh; ./scripts/05-build-boot-image.sh; ./scripts/08-build-uefi-iso.sh /root/ShrimplyOS-build/build/live-build/chroot /root/ShrimplyOS-build/build/artifacts shrimplyos-bookworm-amd64-uefi-x64.iso; cp -f build/artifacts/shrimplyos-bookworm-amd64-uefi-x64.iso /mnt/c/Users/igdes/ShrimplyOS/build/artifacts/; cp -f build/artifacts/shrimplyos-bookworm-amd64-uefi-x64.iso.sha256 /mnt/c/Users/igdes/ShrimplyOS/build/artifacts/"
+```
+
+From Linux shell inside the project:
+
 ```bash
 bash scripts/05-build-boot-image.sh
 ```
 
 ### Expected output artifacts
 
-- `build/artifacts/shrimplyos-bookworm-amd64.iso`
-- `build/artifacts/shrimplyos-bookworm-amd64.iso.sha256`
+- `build/artifacts/shrimplyos-bookworm-amd64-uefi-x64.iso`
+- `build/artifacts/shrimplyos-bookworm-amd64-uefi-x64.iso.sha256`
+
+### Default live login (guaranteed)
+
+- Username: `shrimp`
+- Password: `live`
+
+The ISO build now creates this account explicitly in a chroot hook so credentials are deterministic.
+
+### XFCE first-boot auto-install behavior
+
+On first boot, if you choose the "Ascend to the XFCE Coral Reef" option, Shrimply OS now auto-installs the full XFCE desktop stack before launching the graphical session.
+
+The handoff script installs:
+
+- `xfce4` (full desktop meta package)
+- `xinit`
+- `dbus-x11`
+- `lightdm`
+- `lightdm-gtk-greeter`
+
+In non-systemd environments, the handoff falls back to launching XFCE with `dbus-run-session startxfce4`.
+
+### Intel firmware notes (`iwlwifi` / `.sfi`)
+
+To reduce firmware load failures on Intel hardware, the live image package set includes:
+
+- `firmware-iwlwifi`
+- `firmware-misc-nonfree`
+- `firmware-sof-signed`
+
+If your device still reports a missing firmware blob, it usually means the kernel expects a newer blob than Debian Bookworm currently ships for that exact chipset revision.
 
 ### Recovery behavior (by design)
 

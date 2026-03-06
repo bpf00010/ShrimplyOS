@@ -52,6 +52,9 @@ dialog
 xserver-xorg-core
 lightdm
 lightdm-gtk-greeter
+network-manager
+wpasupplicant
+rfkill
 xfce4-session
 xfwm4
 xfce4-panel
@@ -59,6 +62,9 @@ xfce4-terminal
 live-boot
 live-config
 nvidia-detect
+firmware-iwlwifi
+firmware-misc-nonfree
+firmware-sof-signed
 syslinux-utils
 EOF
 
@@ -79,6 +85,28 @@ if ! grep -q '/usr/local/sbin/shrimply-hardware-detect.sh' /root/.profile 2>/dev
 fi
 EOF
 chmod +x "$BUILD_ROOT/config/hooks/normal/010-shrimply-tui-default.hook.chroot"
+
+cat > "$BUILD_ROOT/config/hooks/normal/012-shrimply-live-user.hook.chroot" <<'EOF'
+#!/bin/sh
+set -e
+
+if ! id -u shrimp >/dev/null 2>&1; then
+  useradd -m -s /bin/bash shrimp
+fi
+
+echo 'shrimp:live' | chpasswd
+EOF
+chmod +x "$BUILD_ROOT/config/hooks/normal/012-shrimply-live-user.hook.chroot"
+
+cat > "$BUILD_ROOT/config/hooks/normal/013-shrimply-networkmanager.hook.chroot" <<'EOF'
+#!/bin/sh
+set -e
+
+if systemctl list-unit-files | grep -q '^NetworkManager.service'; then
+  systemctl enable NetworkManager.service || true
+fi
+EOF
+chmod +x "$BUILD_ROOT/config/hooks/normal/013-shrimply-networkmanager.hook.chroot"
 
 cat > "$BUILD_ROOT/config/hooks/normal/011-shrimply-isohybrid-fix.hook.chroot" <<'EOF'
 #!/bin/sh
@@ -106,7 +134,18 @@ fi
 
 if whiptail --title "$TITLE" --backtitle "$BACKTITLE" \
   --yesno "Ascend to the XFCE Coral Reef now?" 9 60; then
-  systemctl isolate graphical.target
+  if ! command -v xfce4-session >/dev/null 2>&1 || ! command -v startxfce4 >/dev/null 2>&1; then
+    whiptail --title "$TITLE" --infobox "Preparing the XFCE Coral Reef packages..." 8 50
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get install -y xfce4 xinit dbus-x11 lightdm lightdm-gtk-greeter
+  fi
+
+  if [[ "$(cat /proc/1/comm 2>/dev/null)" == "systemd" ]]; then
+    systemctl isolate graphical.target
+  else
+    dbus-run-session startxfce4
+  fi
 fi
 EOF
 chmod +x "$BUILD_ROOT/config/includes.chroot/usr/local/sbin/shrimply-hardware-detect.sh"
@@ -146,6 +185,8 @@ set -e
 SOURCE_ISO=""
 if [[ -f "$BUILD_ROOT/live-image-amd64.iso" ]]; then
   SOURCE_ISO="$BUILD_ROOT/live-image-amd64.iso"
+elif [[ -f "$BUILD_ROOT/binary.iso" ]]; then
+  SOURCE_ISO="$BUILD_ROOT/binary.iso"
 elif [[ -f "$BUILD_ROOT/chroot/binary.hybrid.iso" ]]; then
   SOURCE_ISO="$BUILD_ROOT/chroot/binary.hybrid.iso"
 elif [[ -f "$BUILD_ROOT/chroot/binary.iso" ]]; then
