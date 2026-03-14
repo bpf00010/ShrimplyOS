@@ -29,7 +29,7 @@ if whiptail --title "$TITLE" --backtitle "$BACKTITLE" \
         whiptail --title "$TITLE" --infobox "Preparing the XFCE Coral Reef packages..." 8 50
         export DEBIAN_FRONTEND=noninteractive
         apt-get update
-        apt-get install -y xfce4 xinit dbus-x11 lightdm lightdm-gtk-greeter
+        apt-get install -y xserver-xorg xserver-xorg-video-all xserver-xorg-input-all mesa-utils xfce4 xinit dbus-x11 lightdm lightdm-gtk-greeter
     fi
     
     whiptail --title "$TITLE" --infobox "Summoning LightDM... Prepare your compound eyes." 8 50

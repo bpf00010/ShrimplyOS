@@ -90,7 +90,7 @@ Shrimply OS now uses a **UEFI-first ISO workflow** and treats BIOS hybrid post-p
 From Windows PowerShell (recommended first try; automatic WSL root build):
 
 ```powershell
-wsl.exe -u root bash -lc "set -e; rm -rf /root/ShrimplyOS-build; mkdir -p /root/ShrimplyOS-build; cp -a /mnt/c/Users/igdes/ShrimplyOS/. /root/ShrimplyOS-build/; cd /root/ShrimplyOS-build; sed -i 's/\r$//' scripts/*.sh; ./scripts/05-build-boot-image.sh; ./scripts/08-build-uefi-iso.sh /root/ShrimplyOS-build/build/live-build/chroot /root/ShrimplyOS-build/build/artifacts shrimplyos-bookworm-amd64-uefi-x64.iso; cp -f build/artifacts/shrimplyos-bookworm-amd64-uefi-x64.iso /mnt/c/Users/igdes/ShrimplyOS/build/artifacts/; cp -f build/artifacts/shrimplyos-bookworm-amd64-uefi-x64.iso.sha256 /mnt/c/Users/igdes/ShrimplyOS/build/artifacts/"
+wsl.exe -u root bash -lc "set -e; rm -rf /root/ShrimplyOS-build; mkdir -p /root/ShrimplyOS-build; cp -a /mnt/c/Users/igdes/ShrimplyOS/ShrimplyOS/. /root/ShrimplyOS-build/; cd /root/ShrimplyOS-build; sed -i 's/\r$//' scripts/*.sh; ./scripts/05-build-boot-image.sh; ./scripts/08-build-uefi-iso.sh /root/ShrimplyOS-build/build/live-build/chroot /root/ShrimplyOS-build/build/artifacts shrimplyos-bookworm-amd64-uefi-x64.iso; cp -f build/artifacts/shrimplyos-bookworm-amd64-uefi-x64.iso /mnt/c/Users/igdes/ShrimplyOS/ShrimplyOS/build/artifacts/; cp -f build/artifacts/shrimplyos-bookworm-amd64-uefi-x64.iso.sha256 /mnt/c/Users/igdes/ShrimplyOS/ShrimplyOS/build/artifacts/"
 ```
 
 From Linux shell inside the project:

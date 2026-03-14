@@ -43,13 +43,34 @@ mkdir -p \
 cp "$PROJECT_ROOT/configs/lightdm.conf" "$BUILD_ROOT/config/includes.chroot/etc/lightdm/lightdm.conf"
 cp "$PROJECT_ROOT/assets/lightdm-crustacean-theme.conf" "$BUILD_ROOT/config/includes.chroot/etc/lightdm/lightdm-gtk-greeter.conf"
 
+mkdir -p "$BUILD_ROOT/config/bootloaders/grub-pc"
+mkdir -p "$BUILD_ROOT/config/bootloaders/grub-efi"
+cp "$PROJECT_ROOT/assets/splash_shrimp.png" "$BUILD_ROOT/config/bootloaders/grub-pc/splash.png" || true
+cp "$PROJECT_ROOT/assets/splash_shrimp.png" "$BUILD_ROOT/config/bootloaders/grub-efi/splash.png" || true
+
+mkdir -p "$BUILD_ROOT/config/includes.chroot/usr/share/backgrounds/shrimply"
+cp "$PROJECT_ROOT/assets/splash_shrimp.png" "$BUILD_ROOT/config/includes.chroot/usr/share/backgrounds/shrimply/" || true
+cp "$PROJECT_ROOT/assets/wallpaper"* "$BUILD_ROOT/config/includes.chroot/usr/share/backgrounds/shrimply/" 2>/dev/null || true
+
+cp "$PROJECT_ROOT/assets/shrimp-ascii.sh" "$BUILD_ROOT/config/includes.chroot/usr/bin/shrimp-ascii"
+chmod +x "$BUILD_ROOT/config/includes.chroot/usr/bin/shrimp-ascii"
+
+mkdir -p "$BUILD_ROOT/config/includes.chroot/etc/skel"
+echo "shrimp-ascii" >> "$BUILD_ROOT/config/includes.chroot/etc/skel/.bashrc"
+
+mkdir -p "$BUILD_ROOT/config/includes.chroot/etc/xdg/xfce4/xfconf/xfce-perchannel-xml"
+cp "$PROJECT_ROOT/configs/xfce4-desktop.xml" "$BUILD_ROOT/config/includes.chroot/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml" || true
+
 cat > "$BUILD_ROOT/config/package-lists/shrimply-core.list.chroot" <<'EOF'
 linux-image-amd64
 systemd-sysv
 pciutils
 whiptail
 dialog
-xserver-xorg-core
+xserver-xorg
+xserver-xorg-video-all
+xserver-xorg-input-all
+mesa-utils
 lightdm
 lightdm-gtk-greeter
 network-manager
@@ -62,10 +83,15 @@ xfce4-terminal
 live-boot
 live-config
 nvidia-detect
+firmware-linux-free
+firmware-linux-nonfree
 firmware-iwlwifi
 firmware-misc-nonfree
 firmware-sof-signed
+firmware-amd-graphics
 syslinux-utils
+plymouth
+plymouth-themes
 EOF
 
 cat > "$BUILD_ROOT/config/archives/00-security.list.chroot" <<'EOF'
@@ -138,7 +164,7 @@ if whiptail --title "$TITLE" --backtitle "$BACKTITLE" \
     whiptail --title "$TITLE" --infobox "Preparing the XFCE Coral Reef packages..." 8 50
     export DEBIAN_FRONTEND=noninteractive
     apt-get update
-    apt-get install -y xfce4 xinit dbus-x11 lightdm lightdm-gtk-greeter
+    apt-get install -y xserver-xorg xserver-xorg-video-all xserver-xorg-input-all mesa-utils xfce4 xinit dbus-x11 lightdm lightdm-gtk-greeter calamares calamares-settings-debian
   fi
 
   if [[ "$(cat /proc/1/comm 2>/dev/null)" == "systemd" ]]; then
@@ -173,7 +199,7 @@ lb config noauto \
   --archive-areas "main contrib non-free non-free-firmware" \
   --binary-images iso \
   --bootloader grub \
-  --debian-installer false \
+  --debian-installer live \
   --bootappend-live "boot=live components username=shrimp hostname=shrimply"
 
 echo "🦐 Building ISO image (this can take a while)..."
