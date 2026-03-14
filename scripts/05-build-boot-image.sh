@@ -199,7 +199,7 @@ lb config noauto \
   --archive-areas "main contrib non-free non-free-firmware" \
   --binary-images iso \
   --bootloader grub \
-  --debian-installer live \
+  --debian-installer false \
   --bootappend-live "boot=live components username=shrimp hostname=shrimply"
 
 echo "🦐 Building ISO image (this can take a while)..."
